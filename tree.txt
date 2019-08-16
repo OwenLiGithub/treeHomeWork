@@ -1,0 +1,27 @@
+[
+  {text:'itb一班',icon:'class.png',children: [
+    {text:'Owen', icon:'student.png',leaf: true}
+    ]
+  },
+  {
+    text:'itb二班',
+    icon:'class.png',
+    children:[
+      {text:'peny',icon:'student.png',leaf:true}
+    ]
+  },
+  {
+    text:'itb三班',
+    icon:'class.png',
+    children:[
+      {text:'jack',icon:'student.png',leaf:true}
+    ]
+  },
+  {
+    text:'itb四班',
+    icon:'class.png',
+    children:[
+      {text:'bill',icon:'student.png',leaf:true}
+    ]
+  }
+]

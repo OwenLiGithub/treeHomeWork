@@ -1,0 +1,66 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<meta charset="UTF-8">
+<head>
+    <title></title>
+    <!--ExtJs框架开始-->
+    <script type="text/javascript" src="../ext-3.3.0/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="../ext-3.3.0/ext-all.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="../ext-3.3.0/resources/css/ext-all.css" />
+
+    <!--ExtJs框架结束-->
+
+    <script type="text/javascript">
+        Ext.onReady(function () {
+            var gz = new Ext.tree.TreeNode({text: 'GuangZhou'});
+            
+			var sz = new Ext.tree.TreeNode({text: 'ShenZhen',hidden:false});
+			var zh = new Ext.tree.TreeNode({text: 'ZhuHai'});
+			// Ext.QuickTips.init();
+			// zh.setTooltip('Welcome to ZhuHai')
+			var xz = new Ext.tree.TreeNode({text: 'XiangZhou'});
+			
+			var root = new Ext.tree.TreeNode({
+				text:'GuangDong',
+				checked: true,
+                // expanded: true,
+			});
+			root.appendChild(gz);
+			root.appendChild(sz);
+			root.appendChild(zh);
+			
+			zh.appendChild(xz);
+				
+			var tree = new Ext.tree.TreePanel({
+				renderTo: 'test',
+				width: 200,
+				height: 150,
+                root: root,
+                autoScroll: true,
+                collapsible: true,
+                split:true,
+                listeners: {
+					click: function(node) {
+						Ext.Msg.alert('Tree Event', 'you clicked node:' + node.text);
+					},
+					checkchange: function(node, checked) {
+						Ext.Msg.alert('Tree Event', 'you ' + (checked?'checked':'unchecked') + ' node:' + node.text);
+					},
+				}
+			});
+
+        });
+    </script>
+</head>
+
+
+<body>
+    <div id="test"></div>
+
+</body>
+
+
+</html>
