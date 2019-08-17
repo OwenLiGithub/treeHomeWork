@@ -1,0 +1,228 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<meta charset="UTF-8">
+
+<head>
+    <title></title>
+    <!--ExtJs框架开始-->
+    <script type="text/javascript" src="../ext-3.3.0/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="../ext-3.3.0/ext-all.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="../ext-3.3.0/resources/css/ext-all.css" />
+
+    <!--ExtJs框架结束-->
+
+    <script type="text/javascript">
+        Ext.onReady(function () {
+            Ext.QuickTips.init();
+            Ext.form.Field.prototype.msgTarget = 'side';
+            var changeNode = null;
+            var menu = new Ext.menu.Menu({
+                items: [
+                    {
+                        id: 'deleteItem',
+                        text: 'Delete'
+                    },
+                    {
+                        id: 'addStudent',
+                        text: 'Add Studnet'
+                    },
+                    {
+                        id: 'addClass',
+                        text: 'Add Class'
+                    }
+                ],
+                listeners: {
+                    itemclick: function (item) {
+                        var currentCode = item.parentMenu.contextNode;
+                        switch (item.id) {
+                            case 'deleteItem':
+                                currentCode.remove(true);
+                                break
+                            case 'addStudent':
+                                if (currentCode.parentNode) {
+                                    var studentNode = new Ext.tree.TreeNode({ text: "newStudnet", icon: 'student.png', leaf: true });
+                                    if (currentCode.leaf) {
+                                        currentCode.parentNode.appendChild(studentNode);
+                                    } else {
+                                        currentCode.appendChild(studentNode);
+                                    }
+                                    treeEditor.editNode = studentNode;
+                                    treeEditor.startEdit(studentNode.ui.textNode, '');
+                                } else {
+                                    Ext.Msg.alert("Operation reminder", "Please operate in the right place!!")
+                                }
+                                break;
+                            case 'addClass':
+                                if (!currentCode.parentNode && !currentCode.leaf) {
+                                    var classNode = new Ext.tree.TreeNode({ text: "newClass", icon: 'class.png', });
+                                    currentCode.appendChild(classNode);
+                                    treeEditor.editNode = classNode;
+                                    treeEditor.startEdit(classNode.ui.textNode, '');
+                                } else {
+                                    Ext.Msg.alert("Operation reminder", "Please operate in the right place!!")
+                                }
+                                break;
+                        }
+                    }
+                }
+            })
+            var root = new Ext.tree.AsyncTreeNode({ text: 'ITA-学院', icon: 'school.png' });
+            var tree = new Ext.tree.TreePanel({
+                height: 300,
+                loader: new Ext.tree.TreeLoader({ dataUrl: 'tree.txt' }),
+                root: root,
+                contextMenu: menu,
+                enableDD: true,
+                listeners: {
+                    contextmenu: function (node, e) {
+                        node.select();
+                        var treeContextMenu = node.getOwnerTree().contextMenu;
+                        treeContextMenu.contextNode = node;
+                        treeContextMenu.showAt(e.getXY());
+                    },
+                    click: function (node) {
+                        changeNode = node;
+                    }
+                }
+            });
+            tree.expandAll();
+            var treeEditor = new Ext.tree.TreeEditor(tree, { allowBlank: false }, {
+                listeners: {
+                    complete: function (editor, currVal, origVal) {
+                    }
+                }
+            })
+            var addform = new Ext.form.FormPanel({
+                style: 'border:0px',
+                items: [
+                    {
+                        xtype: 'textfield',
+                        allowBlank: false,
+                        id: 'studentName',
+                        maxLength: 20,
+                        style: 'margin-top:100px;',
+                        labelStyle: 'margin-top:100px;',
+                        name: 'username',
+                        fieldLabel: 'Student Name',
+                        blankText: 'Please Input User Name',
+                        maxLengthText: 'User Name not great than 20 char'
+                    }
+                ],
+                buttons: [
+                    {
+                        xtype: 'button',
+                        text: 'add',
+                        id: 'addx',
+                        style: 'margin-right:40px'
+                    }, {
+                        xtype: 'button',
+                        text: 'reset',
+                        id: 'reset',
+                        style: 'margin-right:50px'
+                    }
+                ]
+            })
+            Ext.getCmp('addx').on('click', function () {
+                let studentName = Ext.get('studentName').dom.value;
+                if (changeNode != null) {
+                    if (!changeNode.leaf && changeNode.parentNode) {
+                        if (studentName == '') {
+                            Ext.Msg.alert("Operation reminder", "Please enter the student name");
+                        } else {
+                            let studentNode = new Ext.tree.TreeNode({ text: studentName, icon: 'student.png', leaf: true });
+                            changeNode.appendChild(studentNode);
+                        }
+                    } else {
+                        Ext.Msg.alert("Operation reminder", "Please select a class first");
+                    }
+                } else {
+                    Ext.Msg.alert("Operation reminder", "Please select a class first");
+                }
+            })
+            var treeFilter = new Ext.tree.TreeFilter(tree, {
+                clearBlank: true,
+                autoClear: true
+            })
+            var searchPanel = new Ext.form.FormPanel({
+                layout: 'column',
+                items: [
+                    {
+                        fieldLabel: 'search name',
+                        xtype: 'textfield',
+                        id: 'searchText',
+                        columnWidth: .4
+                    },
+                    {
+                        xtype: 'button',
+                        text: 'search student',
+                        id: 'searchButton',
+                        columnWidth: .1
+                    }
+                ],
+            })
+            var hiddenPkgs = [];
+            Ext.getCmp('searchButton').on('click', function () {
+                treeFilter.clear();
+                let searchText = Ext.get('searchText').dom.value;
+                Ext.each(hiddenPkgs, function (n) {
+                    n.ui.show();
+                });
+
+                if (!searchText) {
+                    filter.clear();
+                    return;
+                }
+                tree.expandAll();
+                var regExp = new RegExp(Ext.escapeRe(searchText), 'i');
+                treeFilter.filterBy(function (n) {
+                    return !n.isLeaf() || regExp.test(n.text);
+                });
+                hiddenPkgs = [];
+                tree.root.cascade(function (n) {
+                    if (!n.isLeaf() && n.ui.ctNode.offsetHeight < 3) {
+                        n.ui.hide();
+                        hiddenPkgs.push(n);
+                    }
+                });
+            });
+            var home = new Ext.Panel({
+                layout: 'column',
+                style: 'margin:280px auto;border-bottom:0px',
+                width: 700,
+                renderTo: 'home',
+                items: [
+                    {
+                        xtype: 'panel',
+                        title: 'Student infotmation',
+                        width: 300,
+                        items: [
+                            searchPanel,
+                            tree
+                        ],
+                        columnWidth: .5
+                    },
+                    {
+                        xtype: 'panel',
+                        title: 'add student',
+                        height: 351,
+                        items: [
+                            addform
+                        ],
+                        columnWidth: .5
+                    }]
+            });
+        });
+    </script>
+</head>
+
+
+<body>
+    <div id="home"> </div>
+
+</body>
+
+
+</html>
